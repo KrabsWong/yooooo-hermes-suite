@@ -1,0 +1,13 @@
+# Local compose settings
+/env/compose.env
+
+# Runtime data and secrets
+/data/hermes-home/**
+!/data/hermes-home/.gitkeep
+
+# Local OS noise
+.DS_Store
+Thumbs.db
+
+# Local backups
+/backups/
