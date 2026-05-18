@@ -112,3 +112,78 @@ The public entrypoint is Caddy on ports `80` and `443`. The Hermes containers re
 - Caddy persists certificate material in Docker volumes, so do not delete those volumes casually.
 - If you expose Hermes beyond localhost, set a strong `API_SERVER_KEY` before enabling the API server.
 - Real secrets, runtime state, and production domain files are intentionally excluded from Git.
+
+
+## Backup and recovery
+
+Hermes keeps durable state under `data/hermes-home/`. This is not disposable cache: it includes configuration, credentials, sessions, persistent memory, skills, cron data, and SQLite-backed history.
+
+### What must be backed up
+
+- `data/hermes-home/.env`
+- `data/hermes-home/config.yaml`
+- `data/hermes-home/memories/`
+- `data/hermes-home/sessions/`
+- `data/hermes-home/state.db`
+- `data/hermes-home/skills/`
+- `data/hermes-home/cron/`
+- any additional provider-specific memory databases you enable later
+
+### Create a backup
+
+```bash
+./scripts/backup.sh
+```
+
+This creates two artifacts under `backups/`:
+
+1. an **official Hermes backup ZIP** created by `hermes backup`
+2. a **raw directory tarball** for low-level inspection / last-resort recovery
+
+By default, the scripts retain the newest **14** backups of each type. Override with:
+
+```bash
+BACKUP_RETENTION_COUNT=30 ./scripts/backup.sh
+```
+
+### Restore
+
+```bash
+./scripts/restore.sh /absolute/path/to/hermes-backup-YYYYMMDD-HHMMSS.zip
+```
+
+The restore flow stops the stack, imports the official Hermes backup, then starts the stack again.
+
+### Recommended production schedule
+
+Daily local backup example:
+
+```cron
+15 3 * * * cd /opt/yooooo-hermes-suite && BACKUP_RETENTION_COUNT=30 ./scripts/backup-prod.sh
+```
+
+For real disaster recovery, sync `backups/` off-host as well (object storage, another server, or encrypted remote backup). A same-disk backup does not protect against disk loss.
+
+## Upgrade and health
+
+### Local
+
+```bash
+./scripts/health.sh
+./scripts/upgrade.sh
+```
+
+### Production
+
+```bash
+./scripts/health-prod.sh
+./scripts/upgrade-prod.sh
+```
+
+The upgrade scripts create a backup first, pull newer images, recreate the stack, and run health checks afterward.
+
+## Recovery notes
+
+- Do **not** run two Hermes gateway containers against the same `data/hermes-home/` directory at once.
+- SQLite data is part of the durable state. Prefer the official Hermes backup ZIP for restores instead of copying live SQLite sidecar files manually.
+- If you later enable an external memory provider, verify its own persistence requirements too; some providers may add separate databases or external services beyond the built-in Hermes memory files.
