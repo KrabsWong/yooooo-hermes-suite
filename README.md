@@ -33,6 +33,10 @@ cp proxy/caddy/Caddyfile.example proxy/caddy/Caddyfile
 
 For full server setup details, see [`DEPLOYMENT.md`](./DEPLOYMENT.md). For recovery procedures, see [`DISASTER-RECOVERY.md`](./DISASTER-RECOVERY.md).
 
+## UI Preview
+
+![Hermes WebUI preview](./assets/hermes-webui-preview.png)
+
 ## Architecture
 
 ```mermaid
