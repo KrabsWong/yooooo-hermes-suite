@@ -1,13 +1,17 @@
 # Local compose settings
 /env/compose.env
+/env/prod.env
 
 # Runtime data and secrets
 /data/hermes-home/**
 !/data/hermes-home/.gitkeep
 
+# Local backups
+/backups/
+
+# Local proxy config with real domain values
+/proxy/caddy/Caddyfile
+
 # Local OS noise
 .DS_Store
 Thumbs.db
-
-# Local backups
-/backups/

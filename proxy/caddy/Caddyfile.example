@@ -1,0 +1,5 @@
+{$HERMES_DOMAIN} {
+  encode zstd gzip
+
+  reverse_proxy hermes-webui:8787
+}

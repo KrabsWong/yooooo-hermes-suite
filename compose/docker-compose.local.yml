@@ -1,0 +1,8 @@
+services:
+  hermes-agent:
+    ports:
+      - "127.0.0.1:8642:8642"
+
+  hermes-webui:
+    ports:
+      - "127.0.0.1:8787:8787"

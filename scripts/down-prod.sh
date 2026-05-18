@@ -4,6 +4,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 docker compose \
   --env-file "$ROOT_DIR/env/compose.env" \
+  --env-file "$ROOT_DIR/env/prod.env" \
   -f "$ROOT_DIR/compose/docker-compose.yml" \
-  -f "$ROOT_DIR/compose/docker-compose.local.yml" \
-  logs -f "$@"
+  -f "$ROOT_DIR/compose/docker-compose.prod.yml" \
+  down
