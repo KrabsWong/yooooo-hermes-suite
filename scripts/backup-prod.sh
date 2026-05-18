@@ -37,3 +37,11 @@ done
 printf 'Created official backup: %s\n' "$ZIP_PATH"
 printf 'Created raw archive:     %s\n' "$RAW_PATH"
 printf 'Retention count:        %s per backup type\n' "$RETENTION_COUNT"
+
+if [[ -f "$ROOT_DIR/env/remote-backup.env" ]]; then
+  # shellcheck disable=SC1090
+  source "$ROOT_DIR/env/remote-backup.env"
+  if [[ "${AUTO_REMOTE_BACKUP:-false}" == "true" ]]; then
+    "$ROOT_DIR/scripts/sync-backups.sh"
+  fi
+fi

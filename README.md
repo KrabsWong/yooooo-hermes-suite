@@ -187,3 +187,68 @@ The upgrade scripts create a backup first, pull newer images, recreate the stack
 - Do **not** run two Hermes gateway containers against the same `data/hermes-home/` directory at once.
 - SQLite data is part of the durable state. Prefer the official Hermes backup ZIP for restores instead of copying live SQLite sidecar files manually.
 - If you later enable an external memory provider, verify its own persistence requirements too; some providers may add separate databases or external services beyond the built-in Hermes memory files.
+
+
+## Off-host backups: Cloudflare R2 and Tencent Cloud COS
+
+The repository supports off-host backup sync through Dockerized `rclone`, so the host does not need a native `rclone` install.
+
+### 1. Prepare local-only files
+
+```bash
+cp env/remote-backup.env.example env/remote-backup.env
+cp remote-backup/rclone.conf.example remote-backup/rclone.conf
+```
+
+Then edit both files with your real bucket names and credentials.
+
+### 2. Supported remotes
+
+- `r2` — Cloudflare R2
+- `cos` — Tencent Cloud Object Storage
+
+You may use one target or both at the same time:
+
+```bash
+REMOTE_BACKUP_TARGETS="r2:my-r2-bucket/hermes cos:my-cos-bucket/hermes"
+```
+
+### 3. Manual sync
+
+```bash
+./scripts/sync-backups.sh
+```
+
+### 4. Automatic sync after each backup
+
+In `env/remote-backup.env`:
+
+```bash
+AUTO_REMOTE_BACKUP=true
+```
+
+Then every `backup.sh` / `backup-prod.sh` run will upload the new local backup set after creation.
+
+### 5. Inspect remote backups
+
+```bash
+./scripts/list-remote-backups.sh
+```
+
+### 6. Restore from a remote object
+
+```bash
+./scripts/restore-from-remote.sh r2:my-r2-bucket/hermes/hermes-backup-YYYYMMDD-HHMMSS.zip
+```
+
+The script downloads the remote ZIP into `backups/restore-downloads/` and then uses the normal local restore flow.
+
+### 7. Retention note
+
+By default, remote sync uses `copy`, so removing old local backups does **not** delete remote backups. This is safer for disaster recovery. If you explicitly want the remote to mirror local retention, set:
+
+```bash
+REMOTE_BACKUP_SYNC_DELETE=true
+```
+
+Use that only if you are comfortable with remote deletions.

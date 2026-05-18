@@ -1,6 +1,7 @@
 # Local compose settings
 /env/compose.env
 /env/prod.env
+/env/remote-backup.env
 
 # Runtime data and secrets
 /data/hermes-home/**
@@ -15,3 +16,6 @@
 # Local OS noise
 .DS_Store
 Thumbs.db
+
+# Remote backup credentials
+/remote-backup/rclone.conf

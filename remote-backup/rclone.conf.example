@@ -1,0 +1,20 @@
+# Copy to remote-backup/rclone.conf and fill your real credentials.
+
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = YOUR_R2_ACCESS_KEY_ID
+secret_access_key = YOUR_R2_SECRET_ACCESS_KEY
+endpoint = https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+acl = private
+# If using an object-level token, uncomment:
+# no_check_bucket = true
+
+[cos]
+type = s3
+provider = TencentCOS
+access_key_id = YOUR_COS_SECRET_ID
+secret_access_key = YOUR_COS_SECRET_KEY
+region = ap-guangzhou
+endpoint = cos.ap-guangzhou.myqcloud.com
+acl = private
