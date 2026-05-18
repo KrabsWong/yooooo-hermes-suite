@@ -2,6 +2,79 @@
 
 A Docker-based deployment repository for running **Hermes Agent** and **Hermes WebUI** together while keeping host dependencies minimal.
 
+## Quick Start
+
+### Local
+
+```bash
+cp env/compose.env.example env/compose.env
+cp env/hermes.env.example data/hermes-home/.env
+cp config/config.yaml data/hermes-home/config.yaml
+# edit env/compose.env and data/hermes-home/.env
+./scripts/up.sh
+```
+
+Open:
+
+- WebUI: `http://127.0.0.1:8787`
+- Hermes Agent gateway: `http://127.0.0.1:8642`
+
+### Production
+
+```bash
+cp env/compose.env.example env/compose.env
+cp env/hermes.env.example data/hermes-home/.env
+cp env/prod.env.example env/prod.env
+cp config/config.yaml data/hermes-home/config.yaml
+cp proxy/caddy/Caddyfile.example proxy/caddy/Caddyfile
+# edit the copied files, then:
+./scripts/up-prod.sh
+```
+
+For full server setup details, see [`DEPLOYMENT.md`](./DEPLOYMENT.md). For recovery procedures, see [`DISASTER-RECOVERY.md`](./DISASTER-RECOVERY.md).
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Client["Clients"]
+    B["Browser"]
+  end
+
+  subgraph Host["Docker Host"]
+    subgraph LocalMode["Local mode"]
+      LProxy["127.0.0.1 ports"]
+    end
+
+    subgraph Suite["yooooo-hermes-suite"]
+      W["Hermes WebUI"]
+      A["Hermes Agent"]
+      H["data/hermes-home
+config · sessions · memories · state.db"]
+      BK["Local backups
+ZIP + raw archive"]
+    end
+
+    subgraph ProdMode["Production mode"]
+      C["Caddy
+HTTPS reverse proxy"]
+    end
+  end
+
+  D["DeepSeek API"]
+  R2["Cloudflare R2"]
+  COS["Tencent COS"]
+
+  B -->|"local"| LProxy --> W
+  B -->|"production HTTPS"| C --> W
+  W --> A
+  A --> D
+  A <--> H
+  H --> BK
+  BK --> R2
+  BK --> COS
+```
+
 ## Layout
 
 - `compose/` — Docker Compose stack definition
@@ -11,45 +84,19 @@ A Docker-based deployment repository for running **Hermes Agent** and **Hermes W
 - `scripts/` — convenience commands for lifecycle and backup
 - `proxy/caddy/` — production reverse-proxy template
 
-## First-time setup
+## Local operations
 
 ```bash
-cp env/compose.env.example env/compose.env
-cp env/hermes.env.example data/hermes-home/.env
-cp config/config.yaml data/hermes-home/config.yaml
-```
-
-Then edit:
-
-- `env/compose.env`
-- `data/hermes-home/.env`
-
-## Start
-
-```bash
+# Start
 ./scripts/up.sh
-```
 
-Open:
-
-- WebUI: `http://127.0.0.1:8787`
-- Hermes API gateway: `http://127.0.0.1:8642`
-
-## Stop
-
-```bash
+# Stop
 ./scripts/down.sh
-```
 
-## Logs
-
-```bash
+# Logs
 ./scripts/logs.sh
-```
 
-## Backup local Hermes state
-
-```bash
+# Backup
 ./scripts/backup.sh
 ```
 
